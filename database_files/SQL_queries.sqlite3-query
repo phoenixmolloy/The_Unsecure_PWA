@@ -13,3 +13,7 @@
 -- INSERT INTO feedback(feedback) VALUES ("Tempe High School Students WERE HERE!");
 
 -- DELETE FROM feedback WHERE id > 12;
+
+-- SELECT password, salt FROM users;
+
+-- SELECT * FROM users WHERE password = (b'$2b$12$HZl/Jsmu9.53omSFQaRLKOgNloExDoLNKuxl0EG6FVKLD27J2Qfti') and salt = (b'$2b$12$HZl/Jsmu9.53omSFQaRLKO');

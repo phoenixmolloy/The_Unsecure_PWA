@@ -1,14 +1,16 @@
 import sqlite3 as sql
 import time
 import random
+import bcrypt
+import data_handler as sanitiser
 
 
-def insertUser(username, password, DoB):
+def insertUser(username, password, DoB, salt):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
     cur.execute(
-        "INSERT INTO users (username,password,dateOfBirth) VALUES (?,?,?)",
-        (username, password, DoB),
+        "INSERT INTO users (username,password,dateOfBirth,salt) VALUES (?,?,?,?)",
+        (username, password, DoB, salt),
     )
     con.commit()
     con.close()
@@ -18,11 +20,15 @@ def retrieveUsers(username, password):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
     cur.execute(f"SELECT * FROM users WHERE username = '{username}'")
+    result = cur.execute(f"SELECT * FROM users WHERE username = '{username}'")
+    # print(result.fetchone())
     if cur.fetchone() == None:
         con.close()
         return False
     else:
-        cur.execute(f"SELECT * FROM users WHERE password = '{password}'")
+        hashed_password = gethashed_password(username, password)
+        cur.execute(f"SELECT * FROM users WHERE password = (?)", (hashed_password,))
+        # print(result.fetchone())
         # Plain text log of visitor count as requested by Unsecure PWA management
         with open("visitor_log.txt", "r") as file:
             number = int(file.read().strip())
@@ -58,3 +64,16 @@ def listFeedback():
         f.write(f"{row[1]}\n")
         f.write("</p>\n")
     f.close()
+
+
+def gethashed_password(username, password):
+    con = sql.connect("database_files/database.db")
+    cur = con.cursor()
+    result = cur.execute(f"SELECT salt FROM users WHERE username = '{username}'")
+    salt = result.fetchone()[0]
+    my_encoded_password = password.encode()
+    hashed_password = bcrypt.hashpw(password=my_encoded_password, salt=salt)
+    return hashed_password
+
+
+# retrieveUsers("user", "userpassword")

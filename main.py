@@ -2,7 +2,9 @@ from flask import Flask
 from flask import render_template
 from flask import request
 from flask import redirect
+import bcrypt
 import user_management as dbHandler
+import data_handler as sanitiser
 
 # Code snippet for logging a message
 # app.logger.critical("message")
@@ -17,6 +19,9 @@ def addFeedback():
         return redirect(url, code=302)
     if request.method == "POST":
         feedback = request.form["feedback"]
+        print(feedback)
+        feedback = sanitiser.make_web_safe(feedback)  # sanitise xss
+        print(feedback)
         dbHandler.insertFeedback(feedback)
         dbHandler.listFeedback()
         return render_template("/success.html", state=True, value="Back")
@@ -34,8 +39,26 @@ def signup():
         username = request.form["username"]
         password = request.form["password"]
         DoB = request.form["dob"]
-        dbHandler.insertUser(username, password, DoB)
-        return render_template("/index.html")
+        print(username)
+        # username = sanitiser.make_web_safe(username)
+        print(username)
+        # validation
+        try:
+            password = sanitiser.check_password(password)
+        except TypeError:
+            # logger.error()
+            print("TypeError has been logged")
+        except ValueError as inst:
+            # logger.error
+            print("ValueError logged")
+        else:
+            # print(password)
+            encoded_password = password
+            salt = bcrypt.gensalt()
+            hashed_password = bcrypt.hashpw(password=encoded_password, salt=salt)
+            dbHandler.insertUser(username, hashed_password, DoB, salt)
+            return render_template("/index.html")
+        return render_template("/signup.html")
     else:
         return render_template("/signup.html")
 
@@ -49,6 +72,10 @@ def home():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
+        # sanitise username and password
+        username = sanitiser.make_web_safe(username)
+        password = sanitiser.make_web_safe(password)
+        # hashed_password = bcrypt.hashpw(password)
         isLoggedIn = dbHandler.retrieveUsers(username, password)
         if isLoggedIn:
             dbHandler.listFeedback()
@@ -62,4 +89,4 @@ def home():
 if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=8080)

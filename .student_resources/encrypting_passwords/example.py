@@ -12,7 +12,8 @@ my_password = "I Am All The Jedi"
 my_encoded_password = my_password.encode()
 
 # Salt to add to password before Hashing
-salt = b"$2b$12$ieYNkQp8QumgedUo30nuPO"
+# salt = b"$2b$12$ieYNkQp8QumgedUo30nuPO"
+salt = bcrypt.gensalt()
 
 # Hashed Password
 hashed_password = bcrypt.hashpw(password=my_encoded_password, salt=salt)
@@ -26,4 +27,6 @@ print(f"Actual Password: {my_encoded_password.decode()}")
 print(f"Hashed Password: {hashed_password.decode()}")
 
 # Check if a plain text password matches a hashed password. It returns a Boolean value.
-print(f"Are they the same password: {bcrypt.checkpw(my_encoded_password, hashed_password)}")
+print(
+    f"Are they the same password: {bcrypt.checkpw(my_encoded_password, hashed_password)}"
+)
