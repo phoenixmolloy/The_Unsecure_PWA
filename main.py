@@ -52,7 +52,6 @@ def signup():
             # logger.error
             print("ValueError logged")
         else:
-            # print(password)
             encoded_password = password
             salt = bcrypt.gensalt()
             hashed_password = bcrypt.hashpw(password=encoded_password, salt=salt)
