@@ -47,9 +47,9 @@ def signup():
             password = sanitiser.check_password(password)
         except TypeError:
             # logger.error()
-            print("TypeError has been logged")
+            print("TypeError logged")
         except ValueError as inst:
-            # logger.error
+            # logger.error()
             print("ValueError logged")
         else:
             encoded_password = password
