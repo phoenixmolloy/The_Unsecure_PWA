@@ -42,7 +42,7 @@ def signup():
         print(username)
         # username = sanitiser.make_web_safe(username)
         print(username)
-        # validation
+        # Input field validation: creates an error based off specific requirements
         try:
             password = sanitiser.check_password(password)
         except TypeError:
